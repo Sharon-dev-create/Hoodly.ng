@@ -4,7 +4,7 @@
 pragma solidity ^0.8.26;
 
 interface IListingRegistry {
-    event ListingCreated(bytes32 indexed listingId, address indexed owner);
+    // event ListingCreated(bytes32 indexed listingId, address indexed owner);
     event ListingVerified(bytes32 indexed listingId);
     event ListingPaused(bytes32 indexed listingId);
 

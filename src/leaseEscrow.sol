@@ -22,7 +22,7 @@ contract leaseEscrow {
 
     // Core Functions
     function fund() external payable returns(uint256) {
-
+        return msg.value;
     }
 
     function confirmMoveIn() private pure {
@@ -38,6 +38,6 @@ contract leaseEscrow {
     }
 
     function raiseDispute() private returns(bool){
-        
+        return true;
     }
 }
