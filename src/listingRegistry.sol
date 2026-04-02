@@ -50,7 +50,7 @@ contract ListingRegistry is AccessControl, IListingRegistry {
        emit ListingCreated(listingId, msg.sender);
     }
 
-    function verifyListing(bytes32 listingId) external onlyRole(AGENT_ROLE) {
+    function verifyListing(bytes32 listingId) external {
         require(hasRole(ADMIN_ROLE, msg.sender) || hasRole(AGENT_ROLE, msg.sender), "Not Authorized");
         require(listings[listingId].owner != address(0), "Listing not found");
         require(!listings[listingId].verified, "Listing already verified");
