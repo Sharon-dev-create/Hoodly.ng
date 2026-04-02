@@ -4,20 +4,22 @@ pragma solidity ^0.8.26;
 
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IListingRegistry} from "./interfaces/IListingRegistry.sol";
+import {Types} from "./libraries/Types.sol";
 
 
 contract ListingRegistry is AccessControl, IListingRegistry {
-    // State variables
+    using Types for Types.Listing;
 
+    // State Variables
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes public constant AGENT_ROLE = keccak256("AGENT_ROLE");
 
-    //// Structs
-    struct Listing {
-        address owner;
-        address agent;
-        string metadataURI;
-        bool verified;
-        bool active;
-    }
+    mapping(bytes32 => Types.Listing) private listings;
+
+    // Events
+    event ListingCreated(bytes32 indexed listingId, address indexed owner);
+    event ListingVerified(bytes32 indexed listingId);
+    event ListingPaused(bytes32 indexed listingId);
   
     constructor() {
         
