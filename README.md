@@ -1,66 +1,76 @@
-## Foundry
+# Hoodly.ng
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Frontend-first prototype for a curated Nigerian rental experience, plus a Foundry-based smart-contract workspace (WIP).
 
-Foundry consists of:
+## Repository layout
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+- `frontend/`: Vite + React + TypeScript + Tailwind SPA prototype (no backend; browser-only persistence).
+- `contract/`: Foundry workspace with Solidity contracts (scaffolding / incomplete; not wired to the UI yet).
 
-## Documentation
+## Frontend (what works today)
 
-https://book.getfoundry.sh/
+The UI is a static prototype that stores state in `localStorage`:
 
-## Usage
+- Local **signup/login** (single profile + session in the browser)
+- **Explore/Listings** pages + listing detail (`/listings/:id`)
+- **Schedule viewing** request form (saved locally)
+- **Dispute resolution** intake form (saved locally)
+- **Map** + **Legal signing** views are placeholders
+- **Dashboard** is a scaffold
 
-### Build
+Data is currently hard-coded in `frontend/src/lib/listings.ts` and images live in `frontend/public/images/`.
 
-```shell
-$ forge build
+### Run the frontend locally
+
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
-### Test
+Vite runs on `http://localhost:5173` (see `frontend/vite.config.ts`). Deep links are supported on Vercel via `frontend/vercel.json`.
 
-```shell
-$ forge test
+### Build / preview
+
+```bash
+cd frontend
+npm run build
+npm run preview
 ```
 
-### Format
+Design notes live in `frontend/Design.md`.
 
-```shell
-$ forge fmt
+## Smart contracts (WIP / not integrated yet)
+
+Smart contracts live in `contract/` and target Solidity `^0.8.26` (see `contract/src/`).
+
+Current modules are **scaffolding** with stubbed / incomplete implementations:
+
+- `contract/src/listingRegistry.sol`: `ListingRegistry` intended to create/verify/pause listings by `metadataURI` (uses `AccessControl`)
+- `contract/src/leaseEscrow.sol`: escrow flow skeleton for rent + deposit
+- `contract/src/DisputeManager.sol`: dispute flow skeleton
+- `contract/src/libraries/Types.sol`: shared enums/structs (listing + lease types)
+- `contract/src/interfaces/`: `IListingRegistry`, `ILeaseFactory` interfaces for planned integrations
+
+### Work on contracts locally
+
+1. Install Foundry: https://book.getfoundry.sh/getting-started/installation
+2. (If needed) fetch submodules for dependencies:
+
+```bash
+cd contract
+git submodule update --init --recursive
 ```
 
-### Gas Snapshots
+3. Build/format (note: contracts may not compile until stubs are implemented):
 
-```shell
-$ forge snapshot
+```bash
+cd contract
+forge build
+forge fmt
 ```
 
-### Anvil
+## Notes
 
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+- The frontend currently does **not** read/write on-chain state; it’s a UI prototype with local persistence.
+- The contracts directory is early-stage scaffolding and needs implementation + tests before deployment scripts make sense.
