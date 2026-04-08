@@ -4,6 +4,7 @@ pragma solidity ^0.8.26;
 
 import {LeaseEscrow} from "./leaseEscrow.sol";
 import {ILeaseFactory} from "./interfaces/ILeaseFactory.sol";
+import {IListingRegistry} from "./interfaces/IListingRegistry.sol";
 
 contract LeaseFactory is ILeaseFactory {
     // Storage
@@ -43,16 +44,21 @@ contract LeaseFactory is ILeaseFactory {
         require(tenant != address(0), "invalid tenant");
         require(deposit > 0, "Insufficient deposit amount");
         require(rent > 0, "Rent amount must be greater than zero");
+        require(leaseByListing[listingId] == address(0), "Lease already exists for listing");
+
+        (address landlord, , , bool verified, uint8 status) = IListingRegistry(registry).getListing(listingId);
+        require(msg.sender == landlord, "Only landlord");
+        require(verified, "Listing is not verified");
+        require(status == 0, "Listing is not active");
 
         // Create new LeaseEscrow contract
-        // Note: landlord address needs to be fetched from registry based on listingId
         lease = address(new LeaseEscrow(
             paymentToken,
-            address(0), // TODO: Get landlord from registry
+            landlord,
             tenant,
             rent,
             deposit,
-            365 days // TODO: Make duration configurable or fetch from listing
+            365 days
         ));
 
         // Store lease reference
@@ -60,7 +66,7 @@ contract LeaseFactory is ILeaseFactory {
         allLeases.push(lease);
 
         // Emit event
-        emit leaseCreated(lease, listingId, tenant, address(0)); // TODO: Update with actual landlord
+        emit leaseCreated(lease, listingId, tenant, landlord);
 
         return lease;
     }
