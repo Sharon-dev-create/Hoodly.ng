@@ -70,6 +70,10 @@ contract LeaseFactory is ILeaseFactory {
 
         return lease;
     }
+
+    function getLease(bytes32 listingId) external view returns (address) {
+        return leaseByListing[listingId];
+    }
 }
 
 
