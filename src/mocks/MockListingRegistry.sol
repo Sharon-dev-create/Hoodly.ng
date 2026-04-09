@@ -42,6 +42,11 @@ contract MockListingRegistry is IListingRegistry {
         emit AgentAssigned(listingId, msg.sender);
     }
 
+    function isVerifiedAndActive(bytes32 listingId) external view returns (bool) {
+        Types.Listing storage listing = listings[listingId];
+        return listing.verified && listing.status == Types.ListingStatus.Active;
+    }
+
     function pauseListing(bytes32 listingId) external {
         Types.Listing storage listing = listings[listingId];
         require(listing.owner != address(0), "Listing not found");
