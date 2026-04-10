@@ -64,7 +64,9 @@ contract LeaseFactory is ILeaseFactory {
             tenant,
             rent,
             deposit,
-            365 days
+            365 days,
+            feeBps,
+            treasury
         ));
 
         // Store lease reference

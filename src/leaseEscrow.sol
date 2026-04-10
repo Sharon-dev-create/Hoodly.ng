@@ -14,10 +14,13 @@ contract LeaseEscrow is ReentrancyGuard {
     IERC20 public immutable paymentToken;
     address public immutable landlord;
     address public immutable tenant;
+    uint256 public constant GRACE_PERIOD = 21 days; // Time after lease end during which tenant can still pay rent without penalty
+    uint256 public feeBps; // 200 = 2%
 
 
     uint256 public immutable rentAmount;
     uint256 public immutable depositAmount;
+    address public treasury;
 
     // Enum States
     enum State {
@@ -111,12 +114,20 @@ contract LeaseEscrow is ReentrancyGuard {
 
     
     function releaseRent() external {
-        require(msg.sender == tenant, "Only tenant");
         require(state == State.Active, "Lease not active");
+
+        bool isTenant = msg.sender == tenant;
+        bool isLate = block.timestamp >= startTime + GRACE_PERIOD;
+
+        require(isTenant || isLate, "Only tenant can pay rent during grace period");
+
+        uint256 fee = (rentAmount * feeBps) / 10000;
+        uint256 landlordAmount = rentAmount - fee;
 
         state = State.Completed;
 
-        pendingWithdrawals[landlord] += rentAmount;
+        pendingWithdrawals[landlord] += landlordAmount;
+        pendingWithdrawals[treasury] += fee;
         
         emit RentReleased(rentAmount);
     }
@@ -171,10 +182,11 @@ contract LeaseEscrow is ReentrancyGuard {
 
     // Withdraw Payments
     function withdraw(uint256 amount) external {
-        uint256 amount = pendingWithdrawals[msg.sender];
-        require(amount > 0, "Nothing to withdraw");
+        uint256 available = pendingWithdrawals[msg.sender];
+        require(amount > 0 && available >= amount, "Nothing to withdraw");
 
-        pendingWithdrawals[msg.sender] = 0;
+        pendingWithdrawals[msg.sender] = available - amount;
+        completedWithdrawals[msg.sender] += amount;
         
         paymentToken.safeTransfer(msg.sender, amount);
 

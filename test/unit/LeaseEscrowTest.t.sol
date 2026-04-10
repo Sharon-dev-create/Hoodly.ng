@@ -15,10 +15,12 @@ contract LeaseEscrowTest is Test {
     address tenant = address(0x456);
     address randomUser = address(0xabc);
     address arbitrator = address(4);
+    address treasury = address(0xdef);
 
     uint256 rentAmount = 1000e18;
     uint256 depositAmount = 2000e18;
     uint256 duration = 30 days;
+    uint256 feeBps = 200;
 
     function setUp() public{
       paymentToken = new ERC20Mock();
@@ -28,7 +30,9 @@ contract LeaseEscrowTest is Test {
         tenant, 
         rentAmount,
         depositAmount,
-        duration
+        duration,
+        feeBps,
+        treasury
       );
     }
 
@@ -110,8 +114,30 @@ contract LeaseEscrowTest is Test {
 
         vm.prank(tenant);
         escrow.releaseRent();
+        uint256 landlordAmount = rentAmount - ((rentAmount * feeBps) / 10000);
         assertEq(uint(escrow.state()), uint(LeaseEscrow.State.Completed));
-        assertEq(escrow.pendingWithdrawals(landlord), rentAmount);
+        assertEq(escrow.pendingWithdrawals(landlord), landlordAmount);
+    }
+
+    function testLandlordCanReleaseRentAfterGracePeriod() public {
+        uint256 totalAmount = rentAmount + depositAmount;
+
+        vm.startPrank(tenant);
+        paymentToken.mint(tenant, totalAmount);
+        paymentToken.approve(address(escrow), totalAmount);
+        escrow.fund();
+        vm.stopPrank();
+
+        vm.prank(landlord);
+        escrow.activateLease();
+
+        vm.warp(block.timestamp + 21 days);
+        vm.prank(landlord);
+        escrow.releaseRent();
+
+        uint256 landlordAmount = rentAmount - ((rentAmount * feeBps) / 10000);
+        assertEq(uint(escrow.state()), uint(LeaseEscrow.State.Completed));
+        assertEq(escrow.pendingWithdrawals(landlord), landlordAmount);
     }
 
     function testDisputeCanBeRaised() public {
@@ -201,10 +227,11 @@ contract LeaseEscrowTest is Test {
         vm.prank(tenant);
         escrow.releaseRent();
 
+        uint256 landlordAmount = rentAmount - ((rentAmount * feeBps) / 10000);
         vm.prank(landlord);
-        escrow.withdraw(rentAmount);
+        escrow.withdraw(landlordAmount);
 
-        assertEq(paymentToken.balanceOf(landlord), rentAmount);
+        assertEq(paymentToken.balanceOf(landlord), landlordAmount);
     }
 
     function testDisputeFlow() public {
