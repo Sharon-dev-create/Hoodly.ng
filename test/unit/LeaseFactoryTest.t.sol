@@ -17,8 +17,10 @@ contract LeaseFactoryTest is Test {
     address public landlord = address(0x123);
     address public tenant = address(0x456);
     address public attacker = address(0x789);
+    address public treasury = address(0xABC);
     uint256 public rentAmount = 1000e18; // 1000 tokens with 18 decimals
     uint256 public securityDeposit = 2000e18; // 2000 tokens with 18 decimals
+    uint256 public feeBps = 200; // 2%
 
     event leaseCreated(address indexed leaseEscrow, bytes32 indexed listingId, address indexed tenant, address landlord);
     uint256 public leaseDuration = 30 days;
@@ -29,7 +31,7 @@ contract LeaseFactoryTest is Test {
         // Deploy mock ERC20 token and listing registry
         publicToken = new MockERC20();
         listingRegistry = new MockListingRegistry();
-        leaseFactory = new LeaseFactory(address(publicToken), address(listingRegistry));
+        leaseFactory = new LeaseFactory(address(publicToken), address(listingRegistry), treasury, feeBps);
     }
 
     function testCreateLease() public {

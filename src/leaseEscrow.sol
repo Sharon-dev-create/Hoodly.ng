@@ -55,19 +55,28 @@ contract LeaseEscrow is ReentrancyGuard {
         address _tenant,
         uint256 _rentAmount,
         uint256 _depositAmount,
-        uint256 _duration
+        uint256 _duration,
+        uint256 _feeBps,
+        address _treasury
     ) {
         require(_paymentToken != address(0), "Invalid payment token");
         require(_landlord != address(0), "Invalid landlord address");
         require(_tenant != address(0), "Invalid tenant address");
         require(_rentAmount > 0, "Rent amount must be greater than zero");
-        
+        require(_depositAmount > 0, "Deposit amount must be greater than zero");
+        require(_duration > 0, "Duration must be greater than zero");
+        require(_feeBps > 0, "Invalid fee basis points");
+        require(_treasury != address(0), "Invalid treasury address");
+
         paymentToken = IERC20(_paymentToken);
         landlord = _landlord;
         tenant = _tenant;
         rentAmount = _rentAmount;
         depositAmount = _depositAmount;
         duration = _duration;
+
+        treasury = _treasury;
+        feeBps = _feeBps;
 
         state = State.Created;
     }

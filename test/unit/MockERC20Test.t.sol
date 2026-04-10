@@ -45,7 +45,7 @@ contract MockERC20Test is Test {
     function testTransfer() public {
         token.mint(alice, initialSupply);
         vm.prank(alice);
-        token.transfer(bob, 500e18);
+        require(token.transfer(bob, 500e18), "Transfer failed");
         assertEq(token.balanceOf(alice), 500e18);
         assertEq(token.balanceOf(bob), 500e18);
     }
@@ -57,7 +57,7 @@ contract MockERC20Test is Test {
         assertEq(token.allowance(alice, bob), 500e18);
 
         vm.prank(bob);
-        token.transferFrom(alice, bob, 500e18);
+        require(token.transferFrom(alice, bob, 500e18), "TransferFrom failed");
         assertEq(token.balanceOf(alice), 500e18);
         assertEq(token.balanceOf(bob), 500e18);
         assertEq(token.allowance(alice, bob), 0);

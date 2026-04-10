@@ -10,6 +10,8 @@ contract LeaseFactory is ILeaseFactory {
     // Storage
     address public immutable paymentToken;
     address public immutable registry;
+    address public treasury;
+    uint256 public feeBps; // 200 = 2%
 
     //mappings
     mapping(bytes32 => address) public leaseByListing;
@@ -26,12 +28,16 @@ contract LeaseFactory is ILeaseFactory {
     );
 
     // Constructor
-    constructor(address _paymentToken, address _registry) {
+    constructor(address _paymentToken, address _registry, address _treasury, uint256 _feeBps) {
         require(_paymentToken != address(0), "Invalid payment token");
         require(_registry != address(0), "Invalid registry address");
+        require(_treasury != address(0), "Invalid treasury address");
+        require(_feeBps > 0, "Invalid fee basis points");
 
         paymentToken = _paymentToken;
         registry = _registry;
+        treasury = _treasury;
+        feeBps = _feeBps;
      }
 
     // Create LeaseFunction
