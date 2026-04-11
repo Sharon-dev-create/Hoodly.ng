@@ -45,7 +45,7 @@ contract ListingRegistry is AccessControl, IListingRegistry {
         verified: false,
         status: Types.ListingStatus.Active
        });
-
+ 
        // Emit event
        emit ListingCreated(listingId, msg.sender);
     }

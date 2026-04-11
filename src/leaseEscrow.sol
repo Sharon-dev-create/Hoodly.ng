@@ -68,6 +68,7 @@ contract LeaseEscrow is ReentrancyGuard {
         require(_rentAmount > 0, "Rent amount must be greater than zero");
         require(_depositAmount > 0, "Deposit amount must be greater than zero");
         require(_duration > 0, "Duration must be greater than zero");
+        
         require(_feeBps > 0, "Invalid fee basis points");
         require(_treasury != address(0), "Invalid treasury address");
 
