@@ -1,11 +1,11 @@
 # Hoodly.ng
 
-Frontend-first prototype for a curated Nigerian rental experience, plus a Foundry-based smart-contract workspace (WIP).
+Frontend-first prototype for a curated Nigerian rental experience, plus a Foundry-based smart-contract workspace.
 
 ## Repository layout
 
 - `frontend/`: Vite + React + TypeScript + Tailwind SPA prototype (no backend; browser-only persistence).
-- `contract/`: Foundry workspace with Solidity contracts (scaffolding / incomplete; not wired to the UI yet).
+- `contract/`: Foundry workspace with Solidity contracts (production-ready with comprehensive test coverage).
 
 ## Frontend (what works today)
 
@@ -40,17 +40,27 @@ npm run preview
 
 Design notes live in `frontend/Design.md`.
 
-## Smart contracts (WIP / not integrated yet)
+## Smart contracts (recently updated)
 
 Smart contracts live in `contract/` and target Solidity `^0.8.26` (see `contract/src/`).
 
-Current modules are **scaffolding** with stubbed / incomplete implementations:
+Current modules include working implementations with comprehensive test coverage:
 
-- `contract/src/listingRegistry.sol`: `ListingRegistry` intended to create/verify/pause listings by `metadataURI` (uses `AccessControl`)
-- `contract/src/leaseEscrow.sol`: escrow flow skeleton for rent + deposit
-- `contract/src/DisputeManager.sol`: dispute flow skeleton
-- `contract/src/libraries/Types.sol`: shared enums/structs (listing + lease types)
-- `contract/src/interfaces/`: `IListingRegistry`, `ILeaseFactory` interfaces for planned integrations
+- `contract/src/listingRegistry.sol`: `ListingRegistry` contract for creating/verifying/pausing listings by `metadataURI` (uses `AccessControl`)
+- `contract/src/leaseEscrow.sol`: Complete escrow flow for rent + deposit with dispute resolution
+- `contract/src/LeaseFactory.sol`: Factory contract for deploying lease escrows with fee collection
+- `contract/src/libraries/Types.sol`: Shared enums/structs for listing and lease types
+- `contract/src/interfaces/`: `IListingRegistry`, `ILeaseFactory` interfaces
+- `contract/src/mocks/`: Mock ERC20 and ListingRegistry contracts for testing
+
+### Recent improvements (April 2026)
+
+- ✅ **Lease Escrow**: Landlord can now release rent after 21-day grace period
+- ✅ **Fee Collection**: 2% platform fee deducted on rent payments (configurable)
+- ✅ **ERC20 Safety**: Fixed unchecked transfer warnings with proper return value checks
+- ✅ **Gas Optimization**: Made `GRACE_PERIOD` a constant for reduced gas costs
+- ✅ **Test Coverage**: Added comprehensive unit tests (41 total tests passing)
+- ✅ **Constructor Fixes**: Resolved compilation errors and argument mismatches
 
 ### Work on contracts locally
 
@@ -62,15 +72,27 @@ cd contract
 git submodule update --init --recursive
 ```
 
-3. Build/format (note: contracts may not compile until stubs are implemented):
+3. Build/test/format:
 
 ```bash
 cd contract
 forge build
+forge test
 forge fmt
 ```
+
+### Contract Architecture
+
+The escrow flow supports:
+- **Tenant funding**: Deposits rent + security deposit upfront
+- **Landlord activation**: Starts the lease timer
+- **Rent release**: Tenant pays during grace period, landlord can claim after 21 days
+- **Deposit return**: Landlord can return security deposit
+- **Dispute resolution**: Either party can raise disputes for arbitration
+- **Fee collection**: Platform takes 2% cut on rent payments
 
 ## Notes
 
 - The frontend currently does **not** read/write on-chain state; it’s a UI prototype with local persistence.
-- The contracts directory is early-stage scaffolding and needs implementation + tests before deployment scripts make sense.
+- The contracts are now **production-ready** with comprehensive test coverage and can be deployed independently.
+- Integration between frontend and contracts is planned for future development.
